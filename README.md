@@ -4,7 +4,7 @@ Sistem manajemen unit kendaraan dan pemesanan sewa berbasis web. Aplikasi ini di
 
 ---
 
-## 🏗️ Arsitektur Sistem
+## Arsitektur Sistem
 
 Proyek ini menggunakan pola arsitektur **Decoupled (API Backend + SPA Frontend)**:
 - **Backend (Laravel 11)**: Berperan murni sebagai RESTful API. *Business logic* dipisahkan dari controller ke dalam layer `Service` (seperti `BookingService`). Pendekatan ini membuat controller tetap ramping (*thin controllers*), memudahkan *unit testing*, dan meningkatkan *code reusability*.
@@ -13,7 +13,7 @@ Proyek ini menggunakan pola arsitektur **Decoupled (API Backend + SPA Frontend)*
 
 ---
 
-## 🧠 Business Logic
+## Business Logic
 
 ### Logika Deteksi Overlap (Jadwal Bentrok)
 
@@ -36,7 +36,7 @@ Semua perhitungan harga dilakukan secara otorisatif di sisi Backend (`BookingSer
 
 ---
 
-## 🤖 Penggunaan AI Assistant
+## Penggunaan AI Assistant
 
 Pengembangan proyek ini didukung oleh penggunaan **Google Antigravity IDE (Gemini)** untuk mempercepat proses *scaffolding*, pembuatan antarmuka (React UI), hingga penulisan _boilerplate_ API. 
 
@@ -45,7 +45,7 @@ Untuk memastikan AI tidak melakukan halusinasi atau mengubah aturan bisnis secar
 
 ---
 
-## 🚀 Cara Setup & Instalasi
+## Cara Setup & Instalasi
 
 ### Prasyarat
 - PHP 8.2+ & Composer
@@ -92,7 +92,7 @@ npm run dev
 
 ---
 
-## 🔌 API Endpoints
+## API Endpoints
 Base URL: `http://localhost:8000/api`
 
 * **`GET /units`** : List kendaraan (mendukung query parameter `plat_nomor`, `tipe_merk`, `status`).
@@ -103,7 +103,7 @@ Base URL: `http://localhost:8000/api`
 
 ---
 
-## 📦 Postman Collection
+## Postman Collection
 
 Untuk memudahkan testing API, kami telah menyediakan **Postman Collection** yang berisi semua *endpoints* beserta contoh payload dan query parameternya.
 
