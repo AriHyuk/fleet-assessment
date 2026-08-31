@@ -92,6 +92,22 @@ npm run dev
 
 ---
 
+## Pengujian (Unit Testing)
+
+Aplikasi ini dilengkapi dengan pengujian otomatis menggunakan PHPUnit untuk memvalidasi *business logic* kunci (diskon dan skenario jadwal *overlap*).
+
+Untuk menjalankan test:
+```bash
+cd backend
+php artisan test
+```
+*Atau secara spesifik menjalankan test service booking:*
+```bash
+php artisan test --filter BookingServiceTest
+```
+
+---
+
 ## API Endpoints
 Base URL: `http://localhost:8000/api`
 
