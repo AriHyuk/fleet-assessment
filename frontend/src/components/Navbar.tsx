@@ -6,11 +6,11 @@ export default function Navbar() {
       <div className="mx-auto max-w-7xl px-6 h-14 flex items-center justify-between">
 
         {/* Brand */}
-        <NavLink to="/" className="flex items-center gap-2.5 font-bold text-[#f0f6ff] no-underline">
+        <NavLink to="/" className="flex items-center gap-3 font-bold text-[#f0f6ff] no-underline">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[#00d4ff] to-[#7c3aed] flex items-center justify-center text-sm">
             🚗
           </div>
-          <span className="text-base">Fleet<span className="text-[#00d4ff]">.</span>App</span>
+          <span className="text-lg tracking-wide">SewaApp</span>
         </NavLink>
 
         {/* Nav links */}
