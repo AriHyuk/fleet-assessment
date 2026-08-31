@@ -1,56 +1,71 @@
 # Fleet & Rental System
 
-Aplikasi web untuk mengelola unit kendaraan dan pemesanan sewa.  
-Dibangun sebagai take-home assessment dengan fokus pada **ketepatan business logic**: overlap check dan discount calculation.
+Sistem manajemen unit kendaraan dan pemesanan sewa berbasis web. Aplikasi ini dirancang untuk memudahkan pencatatan unit kendaraan (CRUD) serta menangani transaksi sewa dengan fitur *overlap detection* dan kalkulasi harga (termasuk diskon) secara real-time.
 
 ---
 
-## Stack
+## 🏗️ Arsitektur Sistem
 
-| Layer | Teknologi |
-|---|---|
-| Backend | Laravel 11 (PHP) |
-| Frontend | React + Vite |
-| Database | MySQL 8.0 (via Docker) |
-| DB Runtime | Docker Compose (MySQL only — backend & frontend jalan native) |
+Proyek ini menggunakan pola arsitektur **Decoupled (API Backend + SPA Frontend)**:
+- **Backend (Laravel 11)**: Berperan murni sebagai RESTful API. *Business logic* dipisahkan dari controller ke dalam layer `Service` (seperti `BookingService`). Pendekatan ini membuat controller tetap ramping (*thin controllers*), memudahkan *unit testing*, dan meningkatkan *code reusability*.
+- **Frontend (React + TypeScript + Vite)**: Berfungsi sebagai *presentation layer*. Penggunaan TypeScript memberikan *type-safety* pada struktur data `Unit` dan `Booking`, mencegah *runtime errors* saat mengkonsumsi data dari API. Antarmuka dibangun menggunakan Tailwind CSS v4 untuk menghasilkan desain modern secara efisien.
+- **Database (MySQL 8.0 via Docker)**: Layanan database diisolasi dalam container Docker untuk memastikan konsistensi *environment* pengembangan dan mempermudah proses *setup* tanpa instalasi server MySQL lokal secara manual.
 
 ---
 
-## Cara Setup & Jalankan
+## 🧠 Business Logic
+
+### Logika Deteksi Overlap (Jadwal Bentrok)
+
+Untuk memastikan sebuah kendaraan tidak disewa oleh dua pelanggan berbeda di waktu yang bersamaan, sistem menerapkan validasi irisan tanggal (overlap check) sebelum data disimpan. 
+
+Dua transaksi dinyatakan beririsan apabila rentang waktu pemesanan baru tumpang tindih dengan pemesanan yang sudah ada di sistem. Logika SQL yang digunakan:
+
+```sql
+existing.tanggal_mulai <= new.tanggal_selesai
+AND existing.tanggal_selesai >= new.tanggal_mulai
+```
+
+**Kebijakan Inclusive**: Sistem menghitung tanggal secara *inclusive* (tanggal batas ikut dihitung). Jika kondisi overlap di atas terpenuhi, API akan melempar `BookingOverlapException` dan merespon dengan status **HTTP 409 Conflict**.
+
+### Kalkulasi Harga & Diskon
+
+Semua perhitungan harga dilakukan secara otorisatif di sisi Backend (`BookingService`), sehingga nilai dari Frontend hanya digunakan untuk tujuan *preview*.
+- **Durasi Sewa:** Dihitung inklusif `(tanggal_selesai - tanggal_mulai) + 1` hari.
+- **Diskon Otomatis:** Berlaku threshold *strictly* $> 7$ hari. Durasi 7 hari tidak mendapat diskon, sedangkan 8 hari (dan seterusnya) akan mendapatkan potongan harga sebesar **10%**.
+
+---
+
+## 🤖 Penggunaan AI Assistant
+
+Pengembangan proyek ini didukung oleh penggunaan **Google Antigravity IDE (Gemini)** untuk mempercepat proses *scaffolding*, pembuatan antarmuka (React UI), hingga penulisan _boilerplate_ API. 
+
+**Transparansi & Kontrol AI:**
+Untuk memastikan AI tidak melakukan halusinasi atau mengubah aturan bisnis secara sembarangan, *constraints* sistem diatur melalui file [`.agents/rules/business-logic.md`](.agents/rules/business-logic.md). File *rule* ini mengikat AI agent agar patuh 100% terhadap formula kalkulasi diskon dan logika operasional *overlap* yang telah ditetapkan.
+
+---
+
+## 🚀 Cara Setup & Instalasi
 
 ### Prasyarat
-
-- PHP 8.2+
-- Composer
+- PHP 8.2+ & Composer
 - Node.js 18+ & npm
 - Docker & Docker Compose
 
-### 1. Clone & masuk ke folder
-
-```bash
-git clone git@github.com:AriHyuk/fleet-assessment.git
-cd fleet-assessment
-```
-
-### 2. Jalankan MySQL via Docker
-
+### 1. Jalankan Database (Docker)
 ```bash
 docker compose up -d
 ```
+MySQL akan berjalan di port **3307** untuk menghindari konflik dengan port default MySQL lokal.
 
-MySQL akan jalan di port **3307** (bukan 3306 default — untuk hindari konflik dengan MySQL lokal).
-
-### 3. Setup Backend
-
+### 2. Setup Backend (Laravel API)
 ```bash
 cd backend
 composer install
 cp .env.example .env
 php artisan key:generate
 ```
-
-Edit `.env` — pastikan DB config seperti ini:
-
+Pastikan konfigurasi `.env` terhubung ke container Docker:
 ```env
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
@@ -59,126 +74,40 @@ DB_DATABASE=fleet_db
 DB_USERNAME=fleet_user
 DB_PASSWORD=fleet_password
 ```
-
-Jalankan migration:
-
+Jalankan migrasi database dan *development server*:
 ```bash
 php artisan migrate
-```
-
-Jalankan dev server:
-
-```bash
 php artisan serve
-# API tersedia di http://localhost:8000/api
+# API beroperasi di http://localhost:8000/api
 ```
 
-### 4. Setup Frontend
-
+### 3. Setup Frontend (React SPA)
+Buka terminal baru:
 ```bash
 cd frontend
 npm install
 npm run dev
-# UI tersedia di http://localhost:5173
+# Buka aplikasi di http://localhost:5173
 ```
 
 ---
 
-## API Endpoints
-
+## 🔌 API Endpoints
 Base URL: `http://localhost:8000/api`
 
-### Units
-
-| Method | Endpoint | Deskripsi |
-|---|---|---|
-| `GET` | `/units` | Daftar unit (filter: `?plat_nomor=`, `?tipe_merk=`, `?status=`) |
-| `POST` | `/units` | Tambah unit baru |
-| `GET` | `/units/{id}` | Detail unit |
-| `PUT` | `/units/{id}` | Update unit |
-| `DELETE` | `/units/{id}` | Hapus unit |
-
-### Bookings
-
-| Method | Endpoint | Deskripsi |
-|---|---|---|
-| `GET` | `/bookings` | Daftar semua booking |
-| `POST` | `/bookings` | Buat booking baru (overlap check + diskon otomatis) |
-| `GET` | `/bookings/{id}` | Detail booking |
-| `GET` | `/bookings/preview` | Preview harga tanpa simpan (untuk UI) |
+* **`GET /units`** : List kendaraan (mendukung query parameter `plat_nomor`, `tipe_merk`, `status`).
+* **`POST /units`** : Tambah kendaraan.
+* **`GET /bookings`** : Riwayat pemesanan sewa.
+* **`POST /bookings`** : Buat pemesanan baru (Terdapat pengecekan *overlap* 409).
+* **`GET /bookings/preview`** : Menghitung estimasi biaya dan durasi di Frontend sebelum disubmit (tanpa menyimpan ke database).
 
 ---
 
-## Business Logic
+## 📦 Postman Collection
 
-### Overlap Check
+Untuk memudahkan testing API, kami telah menyediakan **Postman Collection** yang berisi semua *endpoints* beserta contoh payload dan query parameternya.
 
-Dua booking overlap jika dan hanya jika:
-
-```
-existing.tanggal_mulai <= new.tanggal_selesai
-AND existing.tanggal_selesai >= new.tanggal_mulai
-```
-
-Kebijakan **inclusive**: tanggal yang sama tidak boleh dipakai dua booking berbeda untuk unit yang sama. Tidak ada granularitas jam.
-
-Jika overlap terdeteksi → `HTTP 409 Conflict` dengan pesan error spesifik.
-
-### Kalkulasi Durasi & Diskon
-
-```
-durasi_hari          = tanggal_selesai - tanggal_mulai + 1   (inclusive)
-harga_sebelum_diskon = unit.harga_sewa_per_hari × durasi_hari
-diskon_persen        = durasi_hari > 7 ? 10% : 0%
-total_harga          = harga_sebelum_diskon × (1 - diskon_persen/100)
-```
-
-- Threshold: **strictly > 7**. Durasi 7 hari **tidak** dapat diskon; durasi 8 hari dapat 10%.
-- Semua kalkulasi dilakukan di backend (`BookingService`) — nilai dari frontend diabaikan saat submit.
-- Field `harga_sebelum_diskon`, `diskon_persen`, dan `total_harga` disimpan terpisah di DB.
-
-> Detail lengkap formula & rasional: [`.agents/rules/business-logic.md`](.agents/rules/business-logic.md)
-
----
-
-## Struktur Folder
-
-```
-fleet-assessment/
-├── backend/                  # Laravel 11
-│   ├── app/
-│   │   ├── Exceptions/
-│   │   │   └── BookingOverlapException.php
-│   │   ├── Http/
-│   │   │   ├── Controllers/
-│   │   │   │   ├── UnitController.php
-│   │   │   │   └── BookingController.php
-│   │   │   └── Requests/
-│   │   │       ├── StoreUnitRequest.php
-│   │   │       ├── UpdateUnitRequest.php
-│   │   │       └── StoreBookingRequest.php
-│   │   ├── Models/
-│   │   │   ├── Unit.php
-│   │   │   └── Booking.php
-│   │   └── Services/
-│   │       └── BookingService.php
-│   ├── database/migrations/
-│   │   ├── ..._create_units_table.php
-│   │   └── ..._create_bookings_table.php
-│   └── routes/
-│       └── api.php
-├── frontend/                 # React + Vite
-├── docker-compose.yml        # MySQL 8.0 only
-├── .agents/rules/
-│   └── business-logic.md     # Constraint permanen untuk AI agent
-└── docs/
-    └── BUILD_PLAN.md
-```
-
----
-
-## Catatan Desain
-
-- **Tidak full-dockerize** — backend & frontend jalan native untuk kemudahan setup reviewer. MySQL saja yang via Docker karena paling friction untuk install.
-- **Tidak ada auth** — di luar scope assessment.
-- **Concurrency** — overlap check di service layer (bukan DB-level row lock). Cukup untuk use case assessment; disebutkan sebagai known limitation di `BUILD_PLAN.md`.
+1. Buka aplikasi Postman.
+2. Klik tombol **Import**.
+3. Pilih file `docs/Fleet_Rental_System.postman_collection.json` dari repositori ini.
+4. Gunakan variabel *environment* `base_url` (secara default sudah di-set ke `http://localhost:8000/api`).

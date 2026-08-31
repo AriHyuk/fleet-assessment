@@ -1,0 +1,296 @@
+{
+	"info": {
+		"_postman_id": "a823c11f-8181-4355-8356-0a2a11b62380",
+		"name": "Fleet & Rental System API",
+		"description": "API Documentation for Fleet & Rental System (Assessment)",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Units",
+			"item": [
+				{
+					"name": "Get All Units",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/units?status=tersedia",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"units"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "tersedia",
+									"description": "Optional: tersedia | disewa"
+								},
+								{
+									"key": "plat_nomor",
+									"value": "B",
+									"description": "Optional: Search by Plat Nomor",
+									"disabled": true
+								},
+								{
+									"key": "tipe_merk",
+									"value": "Toyota",
+									"description": "Optional: Search by Merk",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Unit",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"plat_nomor\": \"B 1234 XYZ\",\n    \"tipe_merk\": \"Toyota Avanza\",\n    \"harga_sewa_per_hari\": 350000,\n    \"status\": \"tersedia\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/units",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"units"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Single Unit",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/units/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"units",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Unit",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"plat_nomor\": \"B 1234 XYZ\",\n    \"tipe_merk\": \"Toyota Avanza Facelift\",\n    \"harga_sewa_per_hari\": 400000,\n    \"status\": \"disewa\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/units/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"units",
+								"1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Unit",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/units/1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"units",
+								"1"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Bookings",
+			"item": [
+				{
+					"name": "Get All Bookings",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/bookings",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"bookings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Preview Pricing",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/bookings/preview?unit_id=1&tanggal_mulai=2026-09-01&tanggal_selesai=2026-09-08",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"bookings",
+								"preview"
+							],
+							"query": [
+								{
+									"key": "unit_id",
+									"value": "1"
+								},
+								{
+									"key": "tanggal_mulai",
+									"value": "2026-09-01"
+								},
+								{
+									"key": "tanggal_selesai",
+									"value": "2026-09-08",
+									"description": "8 days = 10% discount"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Booking",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"unit_id\": 1,\n    \"tanggal_mulai\": \"2026-09-01\",\n    \"tanggal_selesai\": \"2026-09-08\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/bookings",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"bookings"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000/api",
+			"type": "string"
+		}
+	]
+}
