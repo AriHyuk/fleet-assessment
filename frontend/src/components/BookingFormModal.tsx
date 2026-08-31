@@ -2,17 +2,24 @@ import { useState, useEffect, useCallback } from 'react';
 import Modal from './Modal';
 import { createBooking, previewBooking } from '../api/bookings';
 import { getUnits } from '../api/units';
+import { Unit, BookingPricing } from '../types';
 
-const fmt = (n) =>
+const fmt = (n: number | string) =>
   Number(n).toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 });
 
 const today = () => new Date().toISOString().slice(0, 10);
 
-export default function BookingFormModal({ isOpen, onClose, onSaved }) {
-  const [form, setForm]         = useState({ unit_id: '', tanggal_mulai: today(), tanggal_selesai: '' });
-  const [units, setUnits]       = useState([]);
-  const [preview, setPreview]   = useState(null);
-  const [errors, setErrors]     = useState({});
+interface BookingFormModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSaved: () => void;
+}
+
+export default function BookingFormModal({ isOpen, onClose, onSaved }: BookingFormModalProps) {
+  const [form, setForm]         = useState<Record<string, string>>({ unit_id: '', tanggal_mulai: today(), tanggal_selesai: '' });
+  const [units, setUnits]       = useState<Unit[]>([]);
+  const [preview, setPreview]   = useState<{ pricing: BookingPricing } | null>(null);
+  const [errors, setErrors]     = useState<Record<string, string[]>>({});
   const [overlap, setOverlap]   = useState('');
   const [loading, setLoading]   = useState(false);
   const [previewing, setPreviewing] = useState(false);
@@ -26,10 +33,11 @@ export default function BookingFormModal({ isOpen, onClose, onSaved }) {
     }
   }, [isOpen]);
 
-  const set = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
+  const set = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => 
+    setForm((f) => ({ ...f, [field]: e.target.value }));
 
   /* Live preview — debounced on form change */
-  const fetchPreview = useCallback(async (f) => {
+  const fetchPreview = useCallback(async (f: Record<string, string>) => {
     if (!f.unit_id || !f.tanggal_mulai || !f.tanggal_selesai) { setPreview(null); return; }
     if (f.tanggal_selesai < f.tanggal_mulai) { setPreview(null); return; }
     setPreviewing(true);
@@ -48,14 +56,14 @@ export default function BookingFormModal({ isOpen, onClose, onSaved }) {
     return () => clearTimeout(t);
   }, [form, fetchPreview]);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true); setErrors({}); setOverlap('');
     try {
       await createBooking(form);
       onSaved();
       onClose();
-    } catch (err) {
+    } catch (err: any) {
       if (err.response?.status === 422) setErrors(err.response.data.errors ?? {});
       else if (err.response?.status === 409) setOverlap(err.response.data.message);
     } finally {
@@ -63,7 +71,7 @@ export default function BookingFormModal({ isOpen, onClose, onSaved }) {
     }
   };
 
-  const inputCls = (name) =>
+  const inputCls = (name: string) =>
     `w-full px-3.5 py-2.5 rounded-lg bg-white/5 border text-[#f0f6ff] text-sm outline-none transition-all
      ${errors[name] ? 'border-red-500 focus:ring-2 focus:ring-red-500/30' : 'border-white/8 focus:border-[#00d4ff]/60 focus:ring-2 focus:ring-[#00d4ff]/20'}`;
 

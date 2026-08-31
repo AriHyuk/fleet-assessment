@@ -1,15 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getBookings } from '../api/bookings';
 import BookingFormModal from '../components/BookingFormModal';
+import { Booking } from '../types';
 
-const fmt = (n) =>
+const fmt = (n: number | string) =>
   Number(n).toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 });
 
-const fmtDate = (d) =>
+const fmtDate = (d: string) =>
   new Date(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
 
 export default function BookingsPage() {
-  const [bookings, setBookings] = useState([]);
+  const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading]   = useState(true);
   const [modal, setModal]       = useState(false);
 

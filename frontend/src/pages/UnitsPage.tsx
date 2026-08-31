@@ -1,17 +1,18 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getUnits, deleteUnit } from '../api/units';
 import UnitFormModal from '../components/UnitFormModal';
+import { Unit } from '../types';
 
-const fmt = (n) =>
+const fmt = (n: number | string) =>
   Number(n).toLocaleString('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 });
 
 export default function UnitsPage() {
-  const [units, setUnits]         = useState([]);
+  const [units, setUnits]         = useState<Unit[]>([]);
   const [loading, setLoading]     = useState(true);
   const [filter, setFilter]       = useState({ plat_nomor: '', tipe_merk: '', status: '' });
-  const [modal, setModal]         = useState({ open: false, unit: null });
-  const [deleting, setDeleting]   = useState(null);
-  const [confirmDel, setConfirmDel] = useState(null);
+  const [modal, setModal]         = useState<{ open: boolean; unit: Unit | null }>({ open: false, unit: null });
+  const [deleting, setDeleting]   = useState<number | null>(null);
+  const [confirmDel, setConfirmDel] = useState<Unit | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -26,7 +27,7 @@ export default function UnitsPage() {
 
   useEffect(() => { load(); }, [load]);
 
-  const handleDelete = async (unit) => {
+  const handleDelete = async (unit: Unit) => {
     setDeleting(unit.id);
     try { await deleteUnit(unit.id); await load(); }
     finally { setDeleting(null); setConfirmDel(null); }

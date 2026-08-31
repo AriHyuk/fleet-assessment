@@ -1,12 +1,20 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, ReactNode } from 'react';
 
-export default function Modal({ isOpen, onClose, title, children, maxWidth = 'max-w-lg' }) {
-  const backdropRef = useRef(null);
+interface ModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  title: string;
+  children: ReactNode;
+  maxWidth?: string;
+}
+
+export default function Modal({ isOpen, onClose, title, children, maxWidth = 'max-w-lg' }: ModalProps) {
+  const backdropRef = useRef<HTMLDivElement>(null);
 
   // Close on Escape
   useEffect(() => {
     if (!isOpen) return;
-    const handler = (e) => { if (e.key === 'Escape') onClose(); };
+    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
   }, [isOpen, onClose]);
@@ -17,7 +25,7 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = 'ma
     <div
       ref={backdropRef}
       className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
-      onMouseDown={(e) => { if (e.target === backdropRef.current) onClose(); }}
+      onMouseDown={(e: React.MouseEvent) => { if (e.target === backdropRef.current) onClose(); }}
     >
       <div className={`animate-modal w-full ${maxWidth} bg-[#111827] border border-white/8 rounded-2xl shadow-2xl max-h-[90vh] overflow-y-auto`}>
         {/* Header */}

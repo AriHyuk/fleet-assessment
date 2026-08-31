@@ -1,12 +1,20 @@
 import { useState, useEffect } from 'react';
 import Modal from './Modal';
 import { createUnit, updateUnit } from '../api/units';
+import { Unit } from '../types';
 
 const EMPTY = { plat_nomor: '', tipe_merk: '', harga_sewa_per_hari: '', status: 'tersedia' };
 
-export default function UnitFormModal({ isOpen, onClose, unit, onSaved }) {
-  const [form, setForm]     = useState(EMPTY);
-  const [errors, setErrors] = useState({});
+interface UnitFormModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  unit: Unit | null;
+  onSaved: () => void;
+}
+
+export default function UnitFormModal({ isOpen, onClose, unit, onSaved }: UnitFormModalProps) {
+  const [form, setForm]     = useState<Record<string, string>>(EMPTY);
+  const [errors, setErrors] = useState<Record<string, string[]>>({});
   const [loading, setLoading] = useState(false);
   const isEdit = !!unit;
 
@@ -17,21 +25,22 @@ export default function UnitFormModal({ isOpen, onClose, unit, onSaved }) {
     }
   }, [isOpen, unit]);
 
-  const set = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target.value }));
+  const set = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => 
+    setForm((f) => ({ ...f, [field]: e.target.value }));
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setErrors({});
     try {
-      if (isEdit) {
+      if (isEdit && unit) {
         await updateUnit(unit.id, form);
       } else {
         await createUnit(form);
       }
       onSaved();
       onClose();
-    } catch (err) {
+    } catch (err: any) {
       if (err.response?.status === 422) {
         setErrors(err.response.data.errors ?? {});
       }
@@ -40,12 +49,12 @@ export default function UnitFormModal({ isOpen, onClose, unit, onSaved }) {
     }
   };
 
-  const field = (name, label, type = 'text', extra = {}) => (
+  const field = (name: string, label: string, type = 'text', extra: any = {}) => (
     <div className="flex flex-col gap-1.5">
       <label className="text-xs font-semibold uppercase tracking-wide text-[#8b9bb4]">{label}</label>
       <input
         type={type}
-        value={form[name]}
+        value={form[name] || ''}
         onChange={set(name)}
         className={`px-3.5 py-2.5 rounded-lg bg-white/5 border text-[#f0f6ff] text-sm outline-none transition-all placeholder:text-white/20
           ${errors[name] ? 'border-red-500 focus:ring-2 focus:ring-red-500/30' : 'border-white/8 focus:border-[#00d4ff]/60 focus:ring-2 focus:ring-[#00d4ff]/20'}`}
@@ -69,7 +78,7 @@ export default function UnitFormModal({ isOpen, onClose, unit, onSaved }) {
           <div className="flex flex-col gap-1.5">
             <label className="text-xs font-semibold uppercase tracking-wide text-[#8b9bb4]">Status</label>
             <select
-              value={form.status}
+              value={form.status || 'tersedia'}
               onChange={set('status')}
               className="px-3.5 py-2.5 rounded-lg bg-white/5 border border-white/8 text-[#f0f6ff] text-sm outline-none transition-all focus:border-[#00d4ff]/60 focus:ring-2 focus:ring-[#00d4ff]/20 cursor-pointer"
             >
