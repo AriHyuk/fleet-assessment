@@ -19,7 +19,7 @@ Target: working, clean, business logic benar — bukan fitur sebanyak-banyaknya.
 | Layer | Pilihan | Alasan |
 |---|---|---|
 | Backend | Laravel (PHP) | REST API, familiar, cepat eksekusi |
-| Frontend | React (Vite) | Decoupled, familiar, reflex sudah terbentuk |
+| Frontend | React (Vite) + TypeScript | Decoupled, type-safety wajib untuk konsistensi data dari API |
 | Database | MySQL 8.0 | Lebih umum dipakai di industri dibanding SQLite |
 | Local DB runtime | Docker Compose (MySQL only, no Dockerfile) | Kurangi friction reviewer setup, effort minimal |
 | AI Agent | Antigravity (Gemini) | Dengan workspace rules `.agents/rules/` untuk constrain business logic |
@@ -89,12 +89,13 @@ Target: working, clean, business logic benar — bukan fitur sebanyak-banyaknya.
 - [ ] Validasi request (Form Request class), error response konsisten
 - **Acceptance:** Overlap ke-reject dengan pesan jelas; diskon otomatis ter-apply di response; ada test manual (Postman/tinker) yang bukti keduanya jalan
 
-### Phase 3 — Frontend
+### Phase 3 — Frontend (Wajib TypeScript)
+- [ ] Setup React (Vite) dengan strict TypeScript (`tsconfig.json` & `types.ts`)
 - [ ] Table unit kendaraan + search/filter
 - [ ] Form CRUD unit
 - [ ] Form booking (pilih kendaraan, tanggal mulai/selesai, preview harga+diskon sebelum submit)
 - [ ] Error handling UI untuk overlap rejection
-- **Acceptance:** Semua flow CRUD + booking bisa dilakukan end-to-end dari UI
+- **Acceptance:** Semua flow CRUD + booking bisa dilakukan end-to-end dari UI, tidak ada any/compile error dari `tsc`
 
 ### Phase 4 — Seeder & Testing Data
 - [ ] Seeder unit dummy (~5-10 unit)
