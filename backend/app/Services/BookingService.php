@@ -29,8 +29,8 @@ class BookingService
     public function hasOverlap(int $unitId, Carbon $start, Carbon $end, ?int $excludeBookingId = null): bool
     {
         return Booking::where('unit_id', $unitId)
-            ->where('tanggal_mulai', '<=', $end->toDateString())
-            ->where('tanggal_selesai', '>=', $start->toDateString())
+            ->whereDate('tanggal_mulai', '<=', $end->toDateString())
+            ->whereDate('tanggal_selesai', '>=', $start->toDateString())
             ->when($excludeBookingId, fn ($q) => $q->where('id', '!=', $excludeBookingId))
             ->exists();
     }
